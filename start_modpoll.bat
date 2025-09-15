@@ -1,21 +1,20 @@
 @echo off
 setlocal
-set "ROOT=C:\iwmac\wwwroot\modpoll"
-set "TARGET=%ROOT%\index.php"
-set "URL=https://github.com/spenz91/ModpollingTool/releases/download/modpollv2/index.php"
-
-if not exist "%ROOT%" mkdir "%ROOT%"
-
-if not exist "%TARGET%" (
-  echo index.php not found. Downloading...
-  powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -UseBasicParsing -Uri '%URL%' -OutFile '%TARGET%'"
+if not exist "C:\iwmac\wwwroot\modpoll" mkdir "C:\iwmac\wwwroot\modpoll"
+cd /d C:\iwmac\wwwroot\modpoll
+if errorlevel 1 (
+  echo Failed to change directory to C:\iwmac\wwwroot\modpoll
+  pause
+  exit /b 1
+)
+if not exist "index.php" (
+  powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/spenz91/modpoll.github.io/main/index.php' -OutFile 'index.php' } catch { Write-Error $_; exit 1 }"
   if errorlevel 1 (
-    echo Download failed. Aborting.
+    echo Failed to download index.php from GitHub
+    pause
     exit /b 1
   )
 )
-
-cd /d "%ROOT%"
 start "PHP Server @ localhost:8000" cmd /k "php -S localhost:8000"
 timeout /t 2 /nobreak >nul
 start "" "http://localhost:8000"
