@@ -1,10 +1,10 @@
 <?php
 // PHP 5-compatible Modpoll Web UI converted from Tkinter app
-// Uses embedded modpoll.exe in this folder (not system one)
+// Uses system modpoll.exe at C:\iwmac\bin\modpoll.exe (downloads if missing)
 
 // ---------------------------- CONFIG ---------------------------------
 $APP_DIR = __DIR__;
-$MODPOLL_PATH = $APP_DIR . DIRECTORY_SEPARATOR . 'modpoll.exe';
+$MODPOLL_PATH = 'C:\\iwmac\\bin\\modpoll.exe';
 $MODPOLL_DOWNLOAD_URL = 'https://github.com/spenz91/ModpollingTool/releases/download/modpollv2/modpoll.exe';
 $PID_FILE = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'modpoll_runner.pid';
 
