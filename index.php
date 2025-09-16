@@ -170,9 +170,20 @@ if ($action !== '') {
     }
     if ($action === 'run') {
         @set_time_limit(0);
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
+        header('Content-Type: text/event-stream; charset=utf-8');
+        header('Cache-Control: no-cache, no-transform');
         header('X-Accel-Buffering: no');
+        header('Connection: keep-alive');
+        header('Content-Encoding: none');
+
+        @ini_set('output_buffering', 'off');
+        @ini_set('zlib.output_compression', '0');
+        if (function_exists('apache_setenv')) { @apache_setenv('no-gzip', '1'); }
+        @ob_implicit_flush(true);
+        while (ob_get_level() > 0) { @ob_end_flush(); }
+        echo ":\n\n"; // kick-start SSE in some environments
+        @ob_flush();
+        @flush();
         $chk = ensure_modpoll_exists($MODPOLL_PATH, $MODPOLL_DOWNLOAD_URL);
         if (empty($chk['ok'])) { sse_send(array('type'=>'error','message'=>'modpoll.exe not found and download failed')); exit; }
         $customCmd = isset($_GET['custom']) ? trim((string)$_GET['custom']) : '';
@@ -200,6 +211,8 @@ if ($action !== '') {
         if ($pid) { @file_put_contents($PID_FILE, (string)$pid); }
         stream_set_blocking($pipes[1], 0);
         stream_set_blocking($pipes[2], 0);
+        @stream_set_read_buffer($pipes[1], 0);
+        @stream_set_read_buffer($pipes[2], 0);
         fclose($pipes[0]);
 
         $fatalStop = false;
@@ -238,7 +251,7 @@ if ($action !== '') {
                 }
             }
             if ($fatalStop || !$live) { break; }
-            usleep(50000);
+            usleep(5000);
         }
         fclose($pipes[1]);
         fclose($pipes[2]);
